@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+
+# Vacation Portal Project Control Script
+# Usage: ./run [build|start|teardown|check-be|check-fe|check-qa]
+
+set -e
+
+PROJECT_NAME="vacation-portal"
+COMPOSE_FILE="compose.yml"
+BE_CONTAINER="vacation_be"
+FE_CONTAINER="vacation_fe"
+BE_WORKING_DIR="/var/www/html/be"
+FE_WORKING_DIR="/app"
+
+DOCKER_COMPOSE=(docker compose -p $PROJECT_NAME -f $COMPOSE_FILE)
+DOCKER_BACKEND=(docker exec -w $BE_WORKING_DIR -it $BE_CONTAINER)
+DOCKER_FRONTEND=(docker exec -w $FE_WORKING_DIR -it $FE_CONTAINER)
+
+build() {
+  echo "[BUILD] Starting Docker Compose..."
+  DOCKER_BUILDKIT=0 "${DOCKER_COMPOSE[@]}" build
+  "${DOCKER_COMPOSE[@]}" up -d
+
+  # echo "[BUILD] Installing Composer dependencies in BE container..."
+  # "${DOCKER_BACKEND[@]}" composer install
+  echo "[BUILD] Running DB migrations..."
+  "${DOCKER_BACKEND[@]}" composer db:migrate
+  echo "[BUILD] Seeding DB..."
+  "${DOCKER_BACKEND[@]}" composer db:seed
+  echo "[BUILD] Build complete."
+
+  "${DOCKER_COMPOSE[@]}" down
+}
+
+start() {
+  echo "[START] Starting Docker Compose..."
+  "${DOCKER_COMPOSE[@]}" up
+  echo "[START] Project started."
+}
+
+teardown() {
+  echo "[TEARDOWN] Stopping and removing Docker Compose services and volumes..."
+  "${DOCKER_COMPOSE[@]}" down -v
+  echo "[TEARDOWN] Project and volumes stopped and removed."
+}
+
+check-be() {
+  echo "[CHECK] Running all checks in BE container..."
+  "${DOCKER_BACKEND[@]}" composer check:all
+}
+
+check-fe() {
+  echo "[CHECK] Running all checks in FE container..."
+  "${DOCKER_FRONTEND[@]}" npm run validate
+  "${DOCKER_FRONTEND[@]}" npm run test -- --run
+}
+
+check-qa() {
+  echo "[CHECK] Verifying application is reachable at http://localhost:5173..."
+  if ! curl -sf --max-time 5 http://localhost:5173 > /dev/null; then
+    echo "[CHECK] ERROR: Application is not running. Start it with './run start' in another terminal."
+    exit 1
+  fi
+
+  echo "[CHECK] Running Cypress E2E tests from qa/..."
+  (
+    cd qa
+    if [ ! -d node_modules ]; then
+      npm install
+    fi
+    npm test
+  )
+}
+
+case "$1" in
+  build)
+    build
+    ;;
+  start)
+    start
+    ;;
+  teardown)
+    teardown
+    ;;
+  check-be)
+    check-be
+    ;;
+  check-fe)
+    check-fe
+    ;;
+  check-qa)
+    check-qa
+    ;;
+  *)
+    echo "Usage: $0 [build|start|teardown|check-be|check-fe|check-qa]"
+    exit 1
+    ;;
+esac

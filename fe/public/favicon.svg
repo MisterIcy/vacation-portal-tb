@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#42a5f5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976d2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="50" fill="url(#skyGrad)"/>
+
+  <!-- Sun -->
+  <circle cx="70" cy="25" r="8" fill="#ffd54f"/>
+  <line x1="70" y1="15" x2="70" y2="10" stroke="#ffd54f" stroke-width="2" stroke-linecap="round"/>
+  <line x1="70" y1="40" x2="70" y2="35" stroke="#ffd54f" stroke-width="2" stroke-linecap="round"/>
+  <line x1="80" y1="25" x2="85" y2="25" stroke="#ffd54f" stroke-width="2" stroke-linecap="round"/>
+  <line x1="60" y1="25" x2="55" y2="25" stroke="#ffd54f" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Beach umbrella -->
+  <path d="M 30 55 Q 35 45 40 45 Q 45 45 50 55" fill="#ff6b6b" stroke="none"/>
+  <path d="M 40 55 Q 45 45 50 45 Q 55 45 60 55" fill="#fff" stroke="none"/>
+  <path d="M 50 55 Q 55 45 60 45 Q 65 45 70 55" fill="#ff6b6b" stroke="none"/>
+
+  <!-- Umbrella pole -->
+  <line x1="50" y1="55" x2="50" y2="75" stroke="#8d6e63" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Sand/beach -->
+  <ellipse cx="50" cy="78" rx="25" ry="4" fill="#ffe082" opacity="0.7"/>
+</svg>

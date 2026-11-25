@@ -1,0 +1,180 @@
+openapi: 3.0.0
+info:
+  title: 'Vacation Management API'
+  description: 'Vacation management API for streamlining requesting and evaluating vacation requests.'
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:8080'
+    description: 'Development Server'
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: 'User login endpoint'
+      description: 'Verifies user credentials and returns a JWT on success.'
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 'Successful login'
+          content:
+            application/json:
+              schema:
+                properties:
+                  token: { type: string, example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... }
+                type: object
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+  '/users/{id}':
+    get:
+      tags:
+        - User
+      summary: 'Retrieve user details'
+      description: 'Retrieve the details of the user with the provided id.'
+      operationId: getUserById
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'The unique ID of the user to retrieve.'
+          required: true
+          schema:
+            type: integer
+            example: 42
+      responses:
+        '200':
+          description: 'Successfully retrieved user'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserModel'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        -
+          BearerAuth: []
+components:
+  schemas:
+    LoginRequest:
+      title: LoginRequest
+      description: 'Data structure for user authentication.'
+      properties:
+        email:
+          description: "The user's email address"
+          type: string
+          example: john.doe@example.com
+        password:
+          description: "The user's password"
+          type: string
+          format: password
+          example: SecureP@ss123
+      type: object
+    UserModel:
+      title: UserModel
+      description: 'Data structure for a user model.'
+      properties:
+        id:
+          description: "The user's unique identifier"
+          type: integer
+          example: '42'
+          nullable: false
+        email:
+          description: "The user's email address"
+          type: string
+          example: john.doe@example.com
+        name:
+          description: "The user's name"
+          type: string
+          example: 'John Doe'
+        employee_code:
+          description: "The user's employee code"
+          type: string
+          example: '1234567'
+        role:
+          $ref: '#/components/schemas/UserRole'
+        created_at:
+          description: 'Date and time when the user was created'
+          type: string
+          format: date-time
+          example: '2024-01-15T10:00:00Z'
+          nullable: false
+        updated_at:
+          description: 'Date and time when the user was last updated'
+          type: string
+          format: date-time
+          example: '2024-01-15T10:00:00Z'
+          nullable: false
+      type: object
+    UserRole:
+      description: "The user's role"
+      type: string
+      enum:
+        - manager
+        - employee
+      example: manager
+    JsonErrorResponse:
+      title: 'JSON API Error Response'
+      description: 'A standard error object returned by the API for 4xx and 5xx status codes.'
+      properties:
+        status_code:
+          description: 'The HTTP status code of the error response.'
+          type: integer
+          example: 400
+        reason_phrase:
+          description: 'A short, human-readable summary of the error (e.g., "Bad Request", "Unauthorized").'
+          type: string
+          example: 'Internal Server Error'
+      type: object
+  responses:
+    '400':
+      description: 'Bad Request.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JsonErrorResponse'
+    '401':
+      description: Unauthorized.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JsonErrorResponse'
+    '403':
+      description: Forbidden.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JsonErrorResponse'
+    '500':
+      description: 'Internal Server Error.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JsonErrorResponse'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      description: 'JWT based authentication'
+      bearerFormat: JWT
+      scheme: bearer
+tags:
+  -
+    name: Auth
+    description: Auth
+  -
+    name: User
+    description: User

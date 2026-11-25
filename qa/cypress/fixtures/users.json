@@ -1,0 +1,14 @@
+{
+  "manager": {
+    "email": "manager@example.com",
+    "password": "managerpass123",
+    "name": "Manager User",
+    "role": "manager"
+  },
+  "employee": {
+    "email": "employee@example.com",
+    "password": "employeepass123",
+    "name": "Employee User",
+    "role": "employee"
+  }
+}

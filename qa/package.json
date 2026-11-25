@@ -1,0 +1,15 @@
+{
+  "name": "vacation-portal-qa",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Cypress E2E tests for the Vacation Portal QA interview exercise",
+  "scripts": {
+    "postinstall": "cypress install",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test": "cypress run"
+  },
+  "devDependencies": {
+    "cypress": "15.9.0"
+  }
+}

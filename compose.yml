@@ -1,0 +1,66 @@
+services:
+  be:
+    build: ./be/docker
+    container_name: vacation_be
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    env_file:
+      - .env
+
+  db:
+    image: mysql:8.3
+    container_name: vacation_db
+    restart: always
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "1"
+      MYSQL_DATABASE: ${DB_DATABASE:-vacation_db}
+      MYSQL_USER: ${DB_USERNAME:-vacation_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-vacation_pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      # Verify the app database and user are actually usable, not just that
+      # mysqld accepts connections. Guards against a MySQL init race where the
+      # entrypoint reports healthy before it finishes creating MYSQL_DATABASE /
+      # MYSQL_USER, which makes `be` (depends_on: condition: service_healthy)
+      # start against a half-initialized database.
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost && mysql -u${DB_USERNAME:-vacation_user} -p${DB_PASSWORD:-vacation_pass} -e 'SELECT 1' ${DB_DATABASE:-vacation_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # Warning for Windows users: Building this image may be slow
+  # due to 'npm install' performance on Windows file systems.
+  # Alternatives:
+  # 1. If this is a backend only interview remove this service.
+  # 2. Install Node.js v20 locally and:
+  #    - Remove the COPY and the RUN npm ci steps from the Dockerfile.
+  #    - Run 'npm install' on your host machine.
+  #    - Remove the fe/.dockerignore file
+  #    - Finally remove the /app/node_modules volume below.
+  fe:
+    build:
+      context: ./fe
+      dockerfile: docker/Dockerfile
+    container_name: vacation_fe
+    depends_on:
+      - be
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./fe:/app
+      - /app/node_modules
+    working_dir: /app
+
+volumes:
+  db_data:

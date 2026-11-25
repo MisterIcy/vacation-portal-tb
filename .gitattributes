@@ -1,0 +1,14 @@
+# Force LF line endings for text files regardless of the cloning machine's
+# core.autocrlf setting. Without this, Windows clones with autocrlf=true get
+# CRLF line endings on checked-in scripts (e.g. be/vendor/bin/phinx, ./run),
+# which breaks their Unix shebang lines (#!/usr/bin/env php) when those
+# scripts run inside the Linux containers.
+* text=auto eol=lf
+
+# Compiled/binary archives must never be line-ending-normalized.
+*.phar binary
+
+# Windows batch files require CRLF - cmd.exe's GOTO label parser is
+# unreliable with LF-only line endings.
+*.bat text eol=crlf
+*.cmd text eol=crlf
